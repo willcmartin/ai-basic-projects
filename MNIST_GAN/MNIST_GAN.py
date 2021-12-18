@@ -71,21 +71,25 @@ discriminator_model = Discriminator().to(device)
 criterion = nn.BCELoss()
 optimizer = torch.optim.Adam(discriminator_model.parameters(), lr=0.0002)
 
-# train the discriminator model
+# train the discriminator model on half fake, half real data
 total_step = len(train_loader)
-num_epochs = 5
+num_epochs = 1
 for epoch in range(num_epochs):
     for i, (images, labels) in enumerate(train_loader):
-        # move tensors to device
+        if i % 2 == 0:
+            images = torch.rand(100, 1, 28, 28)
+            labels = torch.zeros((100,1))
+        else:
+            labels = torch.ones((100,1))
+
         images = images.to(device)
-        labels = torch.ones((100,1))
         labels = labels.to(device)
 
         # forward pass
         outputs = discriminator_model(images)
         loss = criterion(outputs, labels)
 
-        # Backward and optimize
+        # backward and optimize
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
