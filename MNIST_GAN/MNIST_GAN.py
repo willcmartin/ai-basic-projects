@@ -38,8 +38,8 @@ test_loader = torch.utils.data.DataLoader(
                 batch_size=batch_size,
                 shuffle=False)
 
-print("Train size: {}".format(train_loader.dataset.data.size()))
-print("Test size: {}".format(test_loader.dataset.data.size()))
+# print("Train size: {}".format(train_loader.dataset.data.size()))
+# print("Test size: {}".format(test_loader.dataset.data.size()))
 
 # discriminator model
 class Discriminator(nn.Module):
@@ -65,35 +65,67 @@ class Discriminator(nn.Module):
         return out
 
 discriminator_model = Discriminator().to(device)
-# print(summary(discriminator_model, (1, 28, 28)))
+print("\nDiscriminator Model:")
+print(summary(discriminator_model, (1, 28, 28)))
 
-# loss and optimizer
-criterion = nn.BCELoss()
-optimizer = torch.optim.Adam(discriminator_model.parameters(), lr=0.0002)
 
-# train the discriminator model on half fake, half real data
-total_step = len(train_loader)
-num_epochs = 1
-for epoch in range(num_epochs):
-    for i, (images, labels) in enumerate(train_loader):
-        if i % 2 == 0:
-            images = torch.rand(100, 1, 28, 28)
-            labels = torch.zeros((100,1))
-        else:
-            labels = torch.ones((100,1))
+class Generator(nn.Module):
+    def __init__(self):
+        super(Generator, self).__init__()
+        self.fc = nn.Sequential(
+            nn.Linear(100, 7*7*128),
+            nn.LeakyReLU(0.2))
+        self.layer1 = nn.Sequential(
+            nn.ConvTranspose2d(128, 128, kernel_size=4, stride=2, padding=1),
+            nn.LeakyReLU(0.2))
+        self.layer2 = nn.Sequential(
+            nn.ConvTranspose2d(128, 128, kernel_size=4, stride=2, padding=1),
+            nn.LeakyReLU(0.2),
+            nn.Conv2d(128, 1, kernel_size=7, padding=3),
+            nn.Sigmoid())
 
-        images = images.to(device)
-        labels = labels.to(device)
+    def forward(self, x):
+        out = self.fc(x)
+        out = out.reshape(out.size(0), 128, 7, 7)
+        out = self.layer1(out)
+        out = self.layer2(out)
+        return out
 
-        # forward pass
-        outputs = discriminator_model(images)
-        loss = criterion(outputs, labels)
+generator_model = Generator().to(device)
+print("\nGenerator Model:")
+print(summary(generator_model, (1, 100)))
 
-        # backward and optimize
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
 
-        if (i+1) % 10 == 0:
-            print ('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
-                   .format(epoch+1, num_epochs, i+1, total_step, loss.item()))
+
+
+
+# # loss and optimizer
+# criterion = nn.BCELoss()
+# optimizer = torch.optim.Adam(discriminator_model.parameters(), lr=0.0002)
+#
+# # train the discriminator model on half fake, half real data
+# total_step = len(train_loader)
+# num_epochs = 1
+# for epoch in range(num_epochs):
+#     for i, (images, labels) in enumerate(train_loader):
+#         if i % 2 == 0:
+#             images = torch.rand(100, 1, 28, 28)
+#             labels = torch.zeros((100,1))
+#         else:
+#             labels = torch.ones((100,1))
+#
+#         images = images.to(device)
+#         labels = labels.to(device)
+#
+#         # forward pass
+#         outputs = discriminator_model(images)
+#         loss = criterion(outputs, labels)
+#
+#         # backward and optimize
+#         optimizer.zero_grad()
+#         loss.backward()
+#         optimizer.step()
+#
+#         if (i+1) % 10 == 0:
+#             print ('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
+#                    .format(epoch+1, num_epochs, i+1, total_step, loss.item()))
