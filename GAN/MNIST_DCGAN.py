@@ -9,7 +9,7 @@ from tqdm import tqdm
 # https://arxiv.org/pdf/1511.06434.pdf
 
 # hyperparameters
-num_epochs = 5
+num_epochs = 100
 latent_size = 100
 batch_size = 100
 lr = 0.0002
@@ -127,7 +127,7 @@ total_step = len(train_loader)
 for epoch in range(num_epochs):
     epoch_g_loss = 0
     epoch_d_loss = 0
-    for i, (images, _) in enumerate(tqdm(train_loader, desc="Epoch: {}".format(epoch))):
+    for i, (images, _) in enumerate(tqdm(train_loader, desc="Epoch: {}/{}".format(epoch+1, num_epochs))):
         # load images and labels
         real_images = images.to(device)
         real_labels = torch.ones((batch_size)).to(device)
@@ -161,13 +161,14 @@ for epoch in range(num_epochs):
 
         epoch_g_loss += g_loss
 
-    d_losses.append(epoch_d_loss / i)
-    g_losses.append(epoch_g_loss / i)
+    d_losses.append(epoch_d_loss.item() / i)
+    g_losses.append(epoch_g_loss.item() / i)
 
 # plot losses
 plt.figure()
 plt.plot(d_losses, label='Discriminator loss')
 plt.plot(g_losses, label='Generator Loss')
+plt.title("Discriminator and Generator Losses")
 plt.xlabel("Epoch")
 plt.ylabel("Loss")
 plt.legend()
@@ -177,6 +178,8 @@ plt.show()
 latent_points = torch.rand(batch_size, latent_size, 1, 1).to(device)
 fake_images = generator_model(latent_points)
 figure = plt.figure(figsize=(8, 8))
+plt.title("Generated Images")
+plt.axis("off")
 cols, rows = 3, 3
 for i in range(1, cols * rows + 1):
     sample_idx = torch.randint(len(fake_images), size=(1,)).item()
