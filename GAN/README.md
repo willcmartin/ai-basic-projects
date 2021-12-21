@@ -1,7 +1,7 @@
 # GAN (Generative Adversarial Network) Projects
 
 ### GAN- MNIST
-- [Code (TODO)](TODO)
+- [Code](https://github.com/WillMartin7/ai-basic-projects/blob/main/GAN/MNIST_GAN.py)
 - Implementation of ["Generative Adversarial Networks"](https://arxiv.org/pdf/1406.2661.pdf) (Goodfell et al.)
 
 ### DCGAN (Deep Convolutional GAN)- MNIST
