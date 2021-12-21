@@ -74,23 +74,23 @@ print(summary(discriminator_model, (1, 28, 28)))
 # generator model
 class Generator(nn.Module):
     def __init__(self):
-      super(Generator, self).__init__()
-      self.network = nn.Sequential(
-          nn.ConvTranspose2d(latent_size, 128, kernel_size=4, stride=1, padding=0, bias=False),
-          nn.BatchNorm2d(128),
-          nn.ReLU(True),
+        super(Generator, self).__init__()
+        self.network = nn.Sequential(
+            nn.ConvTranspose2d(latent_size, 128, kernel_size=4, stride=1, padding=0, bias=False),
+            nn.BatchNorm2d(128),
+            nn.ReLU(True),
 
-          nn.ConvTranspose2d(128, 64, kernel_size=3, stride=2, padding=1, bias=False),
-          nn.BatchNorm2d(64),
-          nn.ReLU(True),
+            nn.ConvTranspose2d(128, 64, kernel_size=3, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(64),
+            nn.ReLU(True),
 
-          nn.ConvTranspose2d(64, 32, kernel_size=4, stride=2, padding=1, bias=False),
-          nn.BatchNorm2d(32),
-          nn.ReLU(True),
+            nn.ConvTranspose2d(64, 32, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(32),
+            nn.ReLU(True),
 
-          nn.ConvTranspose2d(32, 1, kernel_size=4, stride=2, padding=1, bias=False),
-          nn.Tanh()
-      )
+            nn.ConvTranspose2d(32, 1, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.Tanh()
+        )
 
     def forward(self, input):
       output = self.network(input)
