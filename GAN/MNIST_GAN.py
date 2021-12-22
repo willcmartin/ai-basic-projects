@@ -10,12 +10,9 @@ from tqdm import tqdm
 
 # hyperparameters
 num_epochs = 100
-latent_size = 64
-hidden_size = 256
+latent_size = 100
 batch_size = 100
 lr = 0.0002
-beta_1= 0.5
-beta_2 = 0.999
 
 # device config
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -49,11 +46,16 @@ class Discriminator(nn.Module):
     def __init__(self):
         super(Discriminator, self).__init__()
         self.network = nn.Sequential(
-            nn.Linear(28*28, hidden_size),
+            nn.Linear(28*28, 1024),
             nn.LeakyReLU(0.2),
-            nn.Linear(hidden_size, hidden_size),
+            nn.Dropout(0.3),
+            nn.Linear(1024, 512),
             nn.LeakyReLU(0.2),
-            nn.Linear(hidden_size, 1),
+            nn.Dropout(0.3),
+            nn.Linear(512, 256),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.3),
+            nn.Linear(256, 1),
             nn.Sigmoid()
         )
 
@@ -70,11 +72,13 @@ class Generator(nn.Module):
     def __init__(self):
         super(Generator, self).__init__()
         self.network = nn.Sequential(
-            nn.Linear(latent_size, hidden_size),
+            nn.Linear(latent_size, 256),
             nn.ReLU(),
-            nn.Linear(hidden_size, hidden_size),
+            nn.Linear(256, 512),
             nn.ReLU(),
-            nn.Linear(hidden_size, 28*28),
+            nn.Linear(512, 1024),
+            nn.ReLU(),
+            nn.Linear(1024, 28*28),
             nn.Tanh()
         )
 
@@ -103,14 +107,14 @@ for epoch in range(num_epochs):
     for i, (images, _) in enumerate(tqdm(train_loader, desc="Epoch: {}/{}".format(epoch+1, num_epochs))):
         # load images and labels
         real_images = images.view(batch_size, -1).to(device)
-        real_labels = torch.ones((batch_size, 1)).to(device)
-        fake_labels = torch.zeros((batch_size, 1)).to(device)
+        real_labels = torch.ones(batch_size, 1).to(device)
+        fake_labels = torch.zeros(batch_size, 1).to(device)
 
         # train discriminator
         outputs = discriminator_model(real_images)
         d_loss_real = criterion(outputs, real_labels)
 
-        latent_points = torch.rand(batch_size, latent_size).to(device)
+        latent_points = torch.randn(batch_size, latent_size).to(device)
         fake_images = generator_model(latent_points)
         outputs = discriminator_model(fake_images)
         d_loss_fake = criterion(outputs, fake_labels)
@@ -120,10 +124,10 @@ for epoch in range(num_epochs):
         d_loss_fake.backward()
         d_optimizer.step()
 
-        epoch_d_loss += d_loss_real + d_loss_fake
+        epoch_d_loss += (d_loss_real + d_loss_fake)
 
         # train generator
-        latent_points = torch.rand(batch_size, latent_size).to(device)
+        latent_points = torch.randn(batch_size, latent_size).to(device)
         fake_images = generator_model(latent_points)
         outputs = discriminator_model(fake_images)
         g_loss = criterion(outputs, real_labels)
