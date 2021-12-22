@@ -137,7 +137,7 @@ for epoch in range(num_epochs):
         outputs = discriminator_model(real_images)
         d_loss_real = criterion(outputs, real_labels)
 
-        latent_points = torch.rand(batch_size, latent_size, 1, 1).to(device)
+        latent_points = torch.randn(batch_size, latent_size, 1, 1).to(device)
         fake_images = generator_model(latent_points)
         outputs = discriminator_model(fake_images)
         d_loss_fake = criterion(outputs, fake_labels)
@@ -150,7 +150,7 @@ for epoch in range(num_epochs):
         epoch_d_loss += d_loss_real + d_loss_fake
 
         # train generator
-        latent_points = torch.rand(batch_size, latent_size, 1, 1).to(device)
+        latent_points = torch.randn(batch_size, latent_size, 1, 1).to(device)
         fake_images = generator_model(latent_points)
         outputs = discriminator_model(fake_images)
         g_loss = criterion(outputs, real_labels)
@@ -175,7 +175,7 @@ plt.legend()
 plt.show()
 
 # plot sample generated images
-latent_points = torch.rand(batch_size, latent_size, 1, 1).to(device)
+latent_points = torch.randn(batch_size, latent_size, 1, 1).to(device)
 fake_images = generator_model(latent_points)
 figure = plt.figure(figsize=(8, 8))
 plt.title("Generated Images")
