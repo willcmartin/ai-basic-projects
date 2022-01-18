@@ -1,10 +1,10 @@
 # working through pytorch cart pole DQN tutorial:
 # https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
 
-# enviornment: cart pole
+# environment: cart pole
 # reward: +1 per timesetep
 # termination state: pole falls over or cart > 2.4 units from center
-# input: diff between current enviornment image and prev
+# input: diff between current environment image and prev
 
 import gym
 import math
@@ -153,7 +153,7 @@ TARGET_UPDATE = 10
 init_screen = get_screen()
 _, _, screen_height, screen_width = init_screen.shape
 
-# num actions in enviornment
+# num actions in environment
 n_actions = env.action_space.n
 
 # policy net: frequently updated
@@ -266,7 +266,7 @@ def optimize_model():
 # 1. get state (diff between last two frames)
 # 2. continue while pole is still upright
 # 3. get action from state using policy net
-# 4. take action in in enviornment and get corresponding reward
+# 4. take action in in environment and get corresponding reward
 # 5. remember reward
 # 6. call optimize model function
 
