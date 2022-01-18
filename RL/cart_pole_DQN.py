@@ -156,6 +156,9 @@ _, _, screen_height, screen_width = init_screen.shape
 # num actions in enviornment
 n_actions = env.action_space.n
 
+# policy net: frequently updated
+# target net: only updated every n episodes, used to avoid sudden catastrophic forgetting
+
 policy_net = DQN(screen_height, screen_width, n_actions).to(device)
 target_net  = DQN(screen_height, screen_width, n_actions).to(device)
 target_net.load_state_dict(policy_net.state_dict())
@@ -187,7 +190,7 @@ def select_action(state):
 episode_durations = []
 
 # plot tool
-# the durations of episodes, average of last 100 episodes
+# plot the durations of episodes, average of last 100 episodes
 
 def plot_durations():
     plt.figure(2)
@@ -208,11 +211,11 @@ def plot_durations():
         display.clear_output(wait=True)
         display.display(plt.gcf())
 
-# training loop: optimize model
+# optimize model function for training loop
 # 1. samples batch
 # 2. concatenate tensors
 # 3. compute output of Q function (Q(s, a))
-# 4. compute value fucntion at next state (V(s_{t+1})) as mas of Q function at next state
+# 4. compute value function at next state (V(s_{t+1})) as max of Q function at next state
 # 5. combine for loss
 
 def optimize_model():
@@ -259,6 +262,14 @@ def optimize_model():
         param.grad.data.clamp_(-1, 1)
     optimizer.step()
 
+# main training loop
+# 1. get state (diff between last two frames)
+# 2. continue while pole is still upright
+# 3. get action from state using policy net
+# 4. take action in in enviornment and get corresponding reward
+# 5. remember reward
+# 6. call optimize model function
+
 num_episodes = 50
 for i_episode in range(num_episodes):
     # Initialize the environment and state
@@ -266,11 +277,11 @@ for i_episode in range(num_episodes):
     last_screen = get_screen()
     current_screen = get_screen()
     state = current_screen - last_screen
-    for t in count():
+    for t in count(): # this is a strange way to write this loop?
         # Select and perform an action
         action = select_action(state)
         _, reward, done, _ = env.step(action.item())
-        reward = torch.tensor([reward], device=device)
+        reward = torch.tensor([reward], device=device) # reward is always 1
 
         # Observe new state
         last_screen = current_screen
